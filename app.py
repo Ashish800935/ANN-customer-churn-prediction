@@ -6,17 +6,11 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 import pickle
 
 
-# ==========================================
-# Load the trained model
-# ==========================================
-
+# Load trained model
 model = tf.keras.models.load_model("model.h5")
 
 
-# ==========================================
-# Load encoders and scaler
-# ==========================================
-
+# Load encoder and scaler files
 with open("label_encoder_gender.pkl", "rb") as f:
     label_encoder_gender = pickle.load(f)
 
@@ -27,14 +21,11 @@ with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
 
 
-# ==========================================
-# Streamlit App
-# ==========================================
-
+# App title
 st.title("Bank Customer Churn Prediction")
 
-# User Inputs
 
+# Take input from user
 geography = st.selectbox(
     "Select Geography",
     ["France", "Spain", "Germany"]
@@ -90,10 +81,7 @@ estimated_salary = st.number_input(
 )
 
 
-# ==========================================
-# Create Input DataFrame
-# ==========================================
-
+# Create dataframe from user input
 input_data = pd.DataFrame([{
     "Geography": geography,
     "Gender": label_encoder_gender.transform([gender])[0],
@@ -108,10 +96,7 @@ input_data = pd.DataFrame([{
 }])
 
 
-# ==========================================
-# One-Hot Encode Geography
-# ==========================================
-
+# Encode Geography
 geo_encoded = onehot_encoder_geography.transform(
     input_data[["Geography"]]
 ).toarray()
@@ -124,10 +109,7 @@ geo_encoded_df = pd.DataFrame(
 )
 
 
-# ==========================================
-# Combine Original + Encoded Features
-# ==========================================
-
+# Add encoded columns
 input_data = pd.concat(
     [
         input_data.drop("Geography", axis=1),
@@ -137,26 +119,18 @@ input_data = pd.concat(
 )
 
 
-# ==========================================
-# Scale Input Data
-# ==========================================
+# Scale the input data
 input_data = input_data[scaler.feature_names_in_]
 input_data_scaled = scaler.transform(input_data)
 
 
-# ==========================================
-# Make Prediction
-# ==========================================
-
+# Predict churn
 prediction = model.predict(input_data_scaled)
 
 prediction_probability = prediction[0][0]
 
 
-# ==========================================
-# Display Prediction
-# ==========================================
-
+# Show result
 if prediction_probability > 0.5:
 
     st.error(
